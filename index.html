@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>空气污染指数</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <!-- built files will be auto injected -->
+  </body>
+  <script type="text/javascript" src="http://webapi.amap.com/maps?v=1.3&key=84aa1865b178ce5372640c67d29d5897"></script>
+  <script type="text/javascript" src="http://webapi.amap.com/maps?v=1.3&key=84aa1865b178ce5372640c67d29d5897&plugin=AMap.CitySearch"></script>
+  <script>
+    var mapObj = new AMap.Map("mapContainer", {
+        resizeEnable: true,
+        view: new AMap.View2D({
+            resizeEnable: true,
+            zoom:13
+        }),
+        keyboardEnable:false
+    });
+  </script>
+</html>
