@@ -26,14 +26,6 @@ export default {
     getAqi(){
         var that = this;
         var token = "f7ea107c74bc8acaa9e851bd30f1ceb5f13c76fb";
-        var mapObj = new AMap.Map("mapContainer", {
-            resizeEnable: true,
-            view: new AMap.View2D({
-                resizeEnable: true,
-                zoom:13
-            }),
-            keyboardEnable:false
-        });
         var clickEventListener=AMap.event.addListener(mapObj,'click',function(e){
             //get x, y coordinate
             var x = e.lnglat.getLng();
