@@ -1,12 +1,12 @@
 <template>
     <div class="container">
-        <div id="mapContainer" v-on:click="getAqi2()"></div>
+        <div id="mapContainer" v-on:click="getAqi()"></div>
         <div id="pos">
-            <div><br>
+            <div>
                 <label>城市：</label><input type="text" id="city" v-mode=city /><br>
-                <label>污染指数：</label><input type="text" id="aqinc" v-mode=aqi /><br>
+                <label>污染指数：</label><input type="text" id="aqicn" v-mode=aqi /><br>
                 <label>经度:</label><input type="text" id="lngX" name="lngX" v-model=lngX /><br>
-                <label>纬度:</label><input type="text" id="latY" name="latY" v-model=lngY />
+                <label>纬度:</label><input type="text" id="latY" name="latY" v-model=latY />
             </div>
         </div>
     </div>
@@ -16,70 +16,81 @@ export default {
   data () {
     return {
       lngX:'',
-      lngY:'',
+      latY:'',
       city:'',
       aqi:'',
       mapObj:''
     }
   },
   methods:{
-      getAqi2($event){
-          alert(2);
-      },
     getAqi(){
-        var cityName = "";
-        alert(1);
-        var clickEventListener=AMap.event.addListener(mapObj,'click',function(e){
-            alert(e)
-            this.lngX = e.lnglat.getLng();
-            this.lngY = e.lnglat.getLat();
-            var citysearch = new AMap.CitySearch();
-            citysearch.getLocalCity(function(status, result) {
-                if (status === 'complete' && result.info === 'OK') {
-                    if (result && result.city && result.bounds) {
-                        cityName = result.city;
-                        this.city = result.city;
-                        var citybounds = result.bounds;
-                    }
-                } else {
-                    alert(result.info);
-                }
-            });
-            ajax('https://api.waqi.info/feed/shanghai/','get',{city:cityName, token: token},true)
-            .then(function(response) {
-                this.aqi = response.data.iaqi.pm25.v;
-            }, function(error) {
-                alert("Failed!", error);
-            });
-            function ajax(url,type,param,async,header) {
-                return new Promise(function(resolve, reject) {
-                    var req = new XMLHttpRequest();
-                    req.onload = function() { 
-                        if(req.status == 200 || req.status == 304) {
-                            resolve(JSON.parse(req.response));
-                        } else {
-                            reject(Error(req.statusText));
-                        }
-                    };
-                    req.onerror = function() {
-                        reject(Error("Network Error"));
-                    };
-                    type == null || type.toUpperCase() == 'GET'?type='get':type='post';
-                    param = formatParams(param);
-                    param == null || param == ''?url:url=url+'?'+param;
-                    async == null || async == true?async=true:async=false;
-                    req.open(type,url,async);
-                    req.send();
-                });
-                function formatParams(data) {
-                    var _fpArr = [];
-                    for (var _fpName in data) {
-                    _fpArr.push(_fpName + "=" + data[_fpName]);
-                    }
-                    return _fpArr.join("&");
-                };
-            }
+        var that = this;
+        var token = "f7ea107c74bc8acaa9e851bd30f1ceb5f13c76fb";
+        var mapObj = new AMap.Map("mapContainer", {
+            resizeEnable: true,
+            view: new AMap.View2D({
+                resizeEnable: true,
+                zoom:13
+            }),
+            keyboardEnable:false
         });
+        var clickEventListener=AMap.event.addListener(mapObj,'click',function(e){
+            //get x, y coordinate
+            var x = e.lnglat.getLng();
+            var y = e.lnglat.getLat();
+            that.lngX = x;
+            that.latY = y;
+            AMap.service('AMap.Geocoder',function(){
+                var geocoder = new AMap.Geocoder({
+                    city: "010"
+                });
+                var lnglatXY=[x, y];
+                geocoder.getAddress(lnglatXY, function(status, result) {
+                    if (status === 'complete' && result.info === 'OK') {
+                        //get city
+                        var cityName = result.regeocode.addressComponent.province;
+                        document.getElementById("city").value = cityName;
+                        ajax('https://api.waqi.info/feed/shanghai/','get',{city:cityName, token: token},true)
+                            .then(function(response) {
+                                //get aqi
+                                document.getElementById("aqicn").value = response.data.iaqi.pm25.v;
+                            }, function(error) {
+                                alert("Failed!", error);
+                            });
+                    }else{
+                        alert("Failed, cannot get city");
+                    }
+                });  
+            })
+        });
+       function ajax(url,type,param,async,header) {
+            return new Promise(function(resolve, reject) {
+                var req = new XMLHttpRequest();
+                req.onload = function() { 
+                    if(req.status == 200 || req.status == 304) {
+                        resolve(JSON.parse(req.response));
+                    } else {
+                        reject(Error(req.statusText));
+                    }
+                };
+                req.onerror = function() {
+                    reject(Error("Network Error"));
+                };
+                type == null || type.toUpperCase() == 'GET'?type='get':type='post';
+                param = formatParams(param);
+                param == null || param == ''?url:url=url+'?'+param;
+                async == null || async == true?async=true:async=false;
+                req.open(type,url,async);
+                req.send();
+            });
+            function formatParams(data) {
+                var _fpArr = [];
+                for (var _fpName in data) {
+              _fpArr.push(_fpName + "=" + data[_fpName]);
+                }
+                return _fpArr.join("&");
+            };
+        }
     }
   }
 }
@@ -100,7 +111,6 @@ export default {
         bottom:0;
     }
     #pos{
-        height: 170px;
         background-color: #fff;
         padding-left: 10px;
         padding-right: 10px;
