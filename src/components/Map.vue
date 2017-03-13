@@ -3,8 +3,8 @@
         <div id="mapContainer" v-on:click="getAqi()"></div>
         <div id="pos">
             <div>
-                <label>城市：</label><input type="text" id="city" v-mode=city /><br>
-                <label>污染指数：</label><input type="text" id="aqicn" v-mode=aqi /><br>
+                <label>城市：</label><input type="text" id="city" v-model=city /><br>
+                <label>污染指数：</label><input type="text" id="aqicn" v-model=aqi /><br>
                 <label>经度:</label><input type="text" id="lngX" name="lngX" v-model=lngX /><br>
                 <label>纬度:</label><input type="text" id="latY" name="latY" v-model=latY />
             </div>
@@ -18,8 +18,7 @@ export default {
       lngX:'',
       latY:'',
       city:'',
-      aqi:'',
-      mapObj:''
+      aqi:''
     }
   },
   methods:{
@@ -41,11 +40,11 @@ export default {
                     if (status === 'complete' && result.info === 'OK') {
                         //get city
                         var cityName = result.regeocode.addressComponent.province;
-                        document.getElementById("city").value = cityName;
+                        that.city = cityName;
                         ajax('https://api.waqi.info/feed/shanghai/','get',{city:cityName, token: token},true)
                             .then(function(response) {
                                 //get aqi
-                                document.getElementById("aqicn").value = response.data.iaqi.pm25.v;
+                                that.aqi = response.data.iaqi.pm25.v;
                             }, function(error) {
                                 alert("Failed!", error);
                             });
