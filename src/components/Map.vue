@@ -33,7 +33,7 @@ export default {
             that.latY = y;
             AMap.service('AMap.Geocoder',function(){
                 var geocoder = new AMap.Geocoder({
-                    city: "010"
+                    city: ""
                 });
                 var lnglatXY=[x, y];
                 geocoder.getAddress(lnglatXY, function(status, result) {
